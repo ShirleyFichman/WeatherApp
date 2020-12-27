@@ -2,13 +2,23 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Home Page! this is the title</title>
+    <title>Weather Data</title>
 </head>
 <body>
-  <h1>Home Page</h1>
-  {% for city in content %}
-  <p>{{city}}</p>
+  <h1>Weather Data: Tel-Aviv, Berlin and Budapest</h1>
+  <table>
+  {% for city, data in d_min_values.items() %}
+      <tr>
+          <td>city: {{ city }}</td>
+          {% for x, y in data.items() %}
+          <tr>
+          <td>{{ x }}:</td>
+          <td>{{ y }}</td>
+          </tr>
+          {% endfor %}
+      </tr>
   {% endfor %}
-<p>The temp min is: {{temp}} </p>
+  </table>
+<p>The city with the lowest temp is: {{lowest_temp_city}}</p>
 </body>
 </html>
