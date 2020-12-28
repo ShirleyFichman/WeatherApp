@@ -11,6 +11,7 @@ def getMinDict():
     lowest_temp_num = None  # will save the lowest temperature overall, for lowest_temp_city
     city_lst = ['Tel-aviv', 'Berlin', 'Budapest']
     d_min_values = {}  # init the result dictionary
+    d_add = {}  # init the "help" dictionary
     for city in city_lst:
         url = 'http://api.openweathermap.org/data/2.5/forecast?q={}&appid=4796f3765df8979006c4bc9c3ffc6719&units=metric'.format(
             city)
@@ -23,8 +24,9 @@ def getMinDict():
             if curr_temp < curr_temp_min:  # update curr_temp_min and save the min_info for the future res dict
                 curr_info_min = (temperature_info['main'])
                 curr_temp_min = curr_temp
-        d_curr = {city: curr_info_min}  # saves the city with the info that's with the lowest temp_min
-        d_min_values.update(d_curr)  # update our result dict with the new city and data
+        d_add = {'city': city}
+        d_add.update(curr_info_min)
+        d_min_values[city] = d_add  # update our result dict with the new city and data
         if lowest_temp_num == None:  # init, for the first iteration
             lowest_temp_city = city
             lowest_temp_num = curr_temp_min
@@ -32,7 +34,7 @@ def getMinDict():
             lowest_temp_city = city
             lowest_temp_num = curr_temp_min
     return d_min_values
-    # return the dictionary of (City: Weather Data) of the specific 3 hour frame which temp_min is the lowest
+    # return the dictionary with the Weather Data of the specific 3 hour frame which temp_min is the lowest, per city
 
 
 app = Flask(__name__)  # reference this file
@@ -46,5 +48,3 @@ def get_lowest_temp():
 
 if __name__ == "__main__":
     app.run()
-
-
