@@ -1,19 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Weather Data: Shirley Fichman</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <h1>Weather Data: Tel-Aviv, Berlin and Budapest</h1>
   <table>
   {% for city, data in d_min_values.items() %}
       <tr>
-          <td>city: {{ city }}</td>
-          {% for x, y in data.items() %}
+          {% for key, value in data.items() %}
           <tr>
-          <td>{{ x }}:</td>
-          <td>{{ y }}</td>
+          <td>{{ key }}:</td>
+          <td>{{ value }}</td>
           </tr>
           {% endfor %}
       </tr>
   {% endfor %}
   </table>
-<p>The city with the lowest temp is: {{lowest_temp_city}}</p>
+<p>The city with the lowest temp_min is: {{lowest_temp_city}}</p>
 </body>
 </html>
