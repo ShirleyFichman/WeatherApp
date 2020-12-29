@@ -1,0 +1,23 @@
+h1{
+  color: DodgerBlue;
+  '''text-decoration: underline;'''
+}
+
+body{
+color: DodgerBlue;
+background-color: white;
+font: normal 15px Arial, Helvetica, sans-serif;
+line-height: 1.6em;
+}
+
+.container{
+width: 80%;
+margin: auto;
+display: flex;
+}
+
+.city-container{
+background-color:AliceBlue;
+border: 1px blue solid;
+padding: 20px;
+}
