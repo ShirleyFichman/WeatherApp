@@ -1,49 +1,77 @@
+from typing import Dict
+from typing import List
 from flask import Flask, url_for, render_template
 import requests
 from pprint import pprint
 
+LIST = 'list'
+MAIN = 'main'
+TEMP_MIN = 'temp_min'
+CITY = 'city'
+URL = 'http://api.openweathermap.org/data/2.5/forecast?q={}&appid=4796f3765df8979006c4bc9c3ffc6719&units=metric'
 
-# add try and except, make everything more pythonic
-# display - would like it to be presented in table like for each city- a column
-
-def getMinDict():
-    global lowest_temp_city  # saves the name of the city with the lowest temp_min
-    lowest_temp_num = None  # will save the lowest temperature overall, for lowest_temp_city
-    city_lst = ['Tel-aviv', 'Berlin', 'Budapest']
-    d_min_values = {}  # init the result dictionary
-    d_add = {}  # init the "help" dictionary
-    for city in city_lst:
-        url = 'http://api.openweathermap.org/data/2.5/forecast?q={}&appid=4796f3765df8979006c4bc9c3ffc6719&units=metric'.format(
-            city)
-        res = requests.get(url)  # get data from the url
-        data = res.json()  # to get the data in a dict format
-        curr_temp_min = data['list'][0]['main']['temp_min']  # init
-        curr_info_min = data['list'][0]['main']  # init
-        for temperature_info in data['list'][1:]:  # iterate on the every 'main' to find lowest temp_min
-            curr_temp = temperature_info['main']['temp_min']
-            if curr_temp < curr_temp_min:  # update curr_temp_min and save the min_info for the future res dict
-                curr_info_min = (temperature_info['main'])
-                curr_temp_min = curr_temp
-        d_add = {'city': city}
-        d_add.update(curr_info_min)
-        d_min_values[city] = d_add  # update our result dict with the new city and data
-        if lowest_temp_num == None:  # init, for the first iteration
-            lowest_temp_city = city
-            lowest_temp_num = curr_temp_min
-        elif curr_temp_min < lowest_temp_num:  # checks for the lowest temp_min overall, comparing cities
-            lowest_temp_city = city
-            lowest_temp_num = curr_temp_min
-    return d_min_values
-    # return the dictionary with the Weather Data of the specific 3 hour frame which temp_min is the lowest, per city
+lowest_temp_city = None
 
 
-app = Flask(__name__)  # reference this file
+def get_min_dict() -> Dict:
+    cities_list = ['Tel-aviv', 'Berlin', 'Budapest']
+    return create_dict(cities_list)
+
+
+def create_dict(cities_list: List) -> Dict:
+    min_data_dict = {}
+    lowest_temp_overall = None
+    for city in cities_list:
+        city_data = get_data(city)
+        curr_info_min = city_data[LIST][0][MAIN]
+        curr_temp_min = curr_info_min[TEMP_MIN]
+        min_data_dict = update_dict(city_data, curr_temp_min, city, min_data_dict, curr_info_min)
+        if new_lowest_temp_overall(lowest_temp_overall, city, curr_temp_min):
+            update_lowest_temp_city(city)
+            lowest_temp_overall = curr_temp_min
+    return min_data_dict
+
+
+def update_lowest_temp_city(city):
+    global lowest_temp_city
+    lowest_temp_city = city
+
+
+def get_data(city):
+    curr_url = URL.format(city)
+    response = requests.get(curr_url)
+    return response.json()
+
+
+def update_dict(city_data, curr_temp_min, city, min_data_dict, curr_info_min) -> Dict:
+    for weather_info in city_data[LIST][1:]:
+        curr_temp = weather_info[MAIN][TEMP_MIN]
+        if curr_temp < curr_temp_min:
+            curr_temp_min = curr_temp
+            curr_info_min = (weather_info[MAIN])
+    return add_city_to_dict(city, min_data_dict, curr_info_min)
+
+
+def add_city_to_dict(city, min_data_dict, curr_info_min) -> Dict:
+    dict_addition = {CITY: city}
+    dict_addition.update(curr_info_min)
+    min_data_dict[city] = dict_addition
+    return min_data_dict
+
+
+def new_lowest_temp_overall(lowest_temp_overall, city, curr_temp_min):
+    if lowest_temp_overall is None:
+        return True
+    return curr_temp_min < lowest_temp_overall
+
+
+app = Flask(__name__)
 
 
 @app.route("/get_lowest_temp")
 def get_lowest_temp():
-    return render_template("index.html", d_min_values=getMinDict(),
-                           lowest_temp_city=lowest_temp_city)  # runs whatever is within index.html
+    return render_template("index.html", min_data_dict=get_min_dict(),
+                           lowest_temp_city=lowest_temp_city)
 
 
 if __name__ == "__main__":
