@@ -1,16 +1,17 @@
-from typing import Dict
-from typing import List
-from flask import Flask, url_for, render_template
+from flask import Flask, url_for, render_template, g
+from typing import Dict, List
 import requests
-from pprint import pprint
+import os
 
 LIST = 'list'
 MAIN = 'main'
 TEMP_MIN = 'temp_min'
 CITY = 'city'
-URL = 'http://api.openweathermap.org/data/2.5/forecast?q={}&appid=4796f3765df8979006c4bc9c3ffc6719&units=metric'
+os.environ['URL'] = 'http://api.openweathermap.org/data/2.5/forecast?q={}&appid=4796f3765df8979006c4bc9c3ffc6719&units=metric'
+
 
 lowest_temp_city = None
+lowest_temp_overall = float('inf')
 
 
 def get_min_dict() -> Dict:
@@ -18,18 +19,40 @@ def get_min_dict() -> Dict:
     return create_dict(cities_list)
 
 
-def create_dict(cities_list: List) -> Dict:
+def create_dict(cities_list: List[str]) -> Dict:
     min_data_dict = {}
-    lowest_temp_overall = None
     for city in cities_list:
         city_data = get_data(city)
-        curr_info_min = city_data[LIST][0][MAIN]
-        curr_temp_min = curr_info_min[TEMP_MIN]
-        min_data_dict = update_dict(city_data, curr_temp_min, city, min_data_dict, curr_info_min)
-        if new_lowest_temp_overall(lowest_temp_overall, city, curr_temp_min):
-            update_lowest_temp_city(city)
-            lowest_temp_overall = curr_temp_min
+        min_data_dict[city] = update_dict(city_data, city)
     return min_data_dict
+
+
+def get_data(city):
+    try:
+        curr_url = os.environ.get('URL').format(city)
+        response = requests.get(curr_url)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.HTTPError as err:
+        raise SystemExit(err)
+
+
+def update_dict(city_data, city) -> Dict:
+    curr_info_min = find_min_temp_min(city_data)
+    curr_temp_min = curr_info_min[TEMP_MIN]
+    if curr_temp_min < lowest_temp_overall:
+        update_lowest_temp_overall(curr_temp_min, city)
+    return get_city_dict(city, curr_info_min)
+
+
+def find_min_temp_min(city_data):
+    curr_temp_min = city_data[LIST][0][MAIN][TEMP_MIN]
+    for weather_info in city_data[LIST][1:]:
+        curr_temp = weather_info[MAIN][TEMP_MIN]
+        if curr_temp < curr_temp_min:
+            curr_temp_min = curr_temp
+            curr_info_min = (weather_info[MAIN])
+    return curr_info_min
 
 
 def update_lowest_temp_city(city):
@@ -37,32 +60,16 @@ def update_lowest_temp_city(city):
     lowest_temp_city = city
 
 
-def get_data(city):
-    curr_url = URL.format(city)
-    response = requests.get(curr_url)
-    return response.json()
+def update_lowest_temp_overall(curr_temp_min, city):
+    update_lowest_temp_city(city)
+    global lowest_temp_overall
+    lowest_temp_overall = curr_temp_min
 
 
-def update_dict(city_data, curr_temp_min, city, min_data_dict, curr_info_min) -> Dict:
-    for weather_info in city_data[LIST][1:]:
-        curr_temp = weather_info[MAIN][TEMP_MIN]
-        if curr_temp < curr_temp_min:
-            curr_temp_min = curr_temp
-            curr_info_min = (weather_info[MAIN])
-    return add_city_to_dict(city, min_data_dict, curr_info_min)
-
-
-def add_city_to_dict(city, min_data_dict, curr_info_min) -> Dict:
-    dict_addition = {CITY: city}
-    dict_addition.update(curr_info_min)
-    min_data_dict[city] = dict_addition
-    return min_data_dict
-
-
-def new_lowest_temp_overall(lowest_temp_overall, city, curr_temp_min):
-    if lowest_temp_overall is None:
-        return True
-    return curr_temp_min < lowest_temp_overall
+def get_city_dict(city, curr_info_min) -> Dict:
+    city_dict = {CITY: city}
+    city_dict.update(curr_info_min)
+    return city_dict
 
 
 app = Flask(__name__)
