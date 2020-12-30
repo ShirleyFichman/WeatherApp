@@ -1,23 +1,38 @@
 h1{
   color: DodgerBlue;
-  '''text-decoration: underline;'''
+  text-align:center;
+  background-color: white;
+  padding: 20px;
+  padding-right: 40px;
+  margin: auto;
 }
 
 body{
 color: DodgerBlue;
 background-color: white;
+background-image: url("https://www.amcharts.com/wp-content/uploads/2016/09/svg_weather_icons.png");
 font: normal 15px Arial, Helvetica, sans-serif;
 line-height: 1.6em;
+text-align:center;
 }
 
 .container{
-width: 80%;
+width: 40%;
 margin: auto;
 display: flex;
 }
 
 .city-container{
 background-color:AliceBlue;
-border: 1px blue solid;
-padding: 20px;
+border: 1px DodgerBlue solid;
+padding: 29px;
 }
+
+.lowest-container{
+background-color:AliceBlue;
+border: 1px DodgerBlue solid;
+text-align: center;
+width: 40%;
+margin: auto;
+}
+
