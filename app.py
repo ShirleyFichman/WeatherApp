@@ -7,8 +7,8 @@ LIST = 'list'
 MAIN = 'main'
 TEMP_MIN = 'temp_min'
 CITY = 'city'
-os.environ['URL'] = 'http://api.openweathermap.org/data/2.5/forecast?q={}&appid=4796f3765df8979006c4bc9c3ffc6719&units=metric'
-
+os.environ[
+    'URL'] = 'http://api.openweathermap.org/data/2.5/forecast?q={}&appid=4796f3765df8979006c4bc9c3ffc6719&units=metric'
 
 lowest_temp_city = None
 lowest_temp_overall = float('inf')
