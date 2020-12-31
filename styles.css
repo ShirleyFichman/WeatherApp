@@ -1,16 +1,14 @@
 h1{
-  color: DodgerBlue;
+  color: white;
   text-align:center;
-  background-color: white;
   padding: 20px;
-  padding-right: 40px;
   margin: auto;
 }
 
 body{
 color: DodgerBlue;
 background-color: white;
-background-image: url("https://www.amcharts.com/wp-content/uploads/2016/09/svg_weather_icons.png");
+background-image: url("https://cdn.wallpapersafari.com/64/96/vLRhf9.jpg");
 font: normal 15px Arial, Helvetica, sans-serif;
 line-height: 1.6em;
 text-align:center;
@@ -35,4 +33,3 @@ text-align: center;
 width: 40%;
 margin: auto;
 }
-
